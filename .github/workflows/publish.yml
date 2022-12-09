@@ -11,8 +11,6 @@ with:
 registry: ghcr.io
 username: ${{ "reenalmainly" }}
 password: ${{ "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" }}
-username: ${{ github.actor }}
-password: ${{ stdin }}
 - name: Build the hello-docker Docker image
 run: |
        docker build . --tag ghcr.io/reenalmainly/hello-docker-gcr-demo:latest
