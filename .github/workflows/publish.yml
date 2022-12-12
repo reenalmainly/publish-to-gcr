@@ -16,10 +16,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
-      - name: Docker meta
-        #id: meta
-        #uses: docker/metadata-action@v4
         with:
           images: ghcr.io/thedatabaseme/hello-world
           flavor: latest=true
