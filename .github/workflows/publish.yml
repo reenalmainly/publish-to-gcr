@@ -4,9 +4,9 @@ jobs:
  publish-hello-docker-image:
    runs-on: ubuntu-latest
    steps:
-     - uses: actions/checkout@v2
-     - name: Build the hello-docker Docker image
-       run:|
+   - uses: actions/checkout@v2
+   - name: Build the hello-docker Docker image
+     run: |
          echo $CR_PAT | docker login ghcr.io -u reenalmainly --password-stdin
-       env: 
+     env: 
          CR_PAT : ${{secrets.CR_PAT}}       
