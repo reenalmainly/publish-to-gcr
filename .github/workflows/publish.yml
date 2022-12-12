@@ -1,51 +1,61 @@
-name: Build and publish the container image
+name: Publish Docker Image
 
-"on":
+on:
   push:
-    tags:
-      - '*'
-    branches:
-      - 'main'
-
+    branches: [ main ]
+  release:
+    types:
+      - published
+        
 jobs:
-  build-and-push-image:
+
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+    
     steps:
-      -
-        name: Checkout repository
+      - name: Check out
         uses: actions/checkout@v2
+        
+      - name: Docker meta
+        id: docker_meta
+        uses: crazy-max/ghaction-docker-meta@v1
         with:
-          fetch-depth: 0
-
-      -
-        name: Get tag
-        id: repository
-        run: echo  "::set-output name=tag::$(git describe --tags HEAD)"
-
-      -
-        name: Set up QEMU
+          images: ghcr.io/reenalmainly/publish-to-gcr
+          tag-sha: true
+          tag-edge: false
+          tag-latest: true
+          
+      - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
-      -
-        name: Set up Docker Buildx
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-
-      -
-        name: Log in to the Container registry
-        uses: docker/login-action@v2
+        
+      - name: Login to GHCR
+        uses: docker/login-action@v1
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      -
-        name: Build and push
+          
+      - name: Build image
         uses: docker/build-push-action@v2
         with:
-          context: .
-          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.docker_meta.outputs.tags }} 
+          file: ./Dockerfile
+          
+      - name: Monitor image for vulnerabilities with Snyk
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK }}
+        with:
+          command: monitor
+          image: "ghcr.io/reenalmainly/publish-to-gcr:main"
+          args: --file=Dockerfile --project-name=rgapi 
+          
+      - name: Push image
+        uses: docker/build-push-action@v2
+        with:
           push: true
-          tags: ghcr.io/${{ github.repository }}:${{ steps.repository.outputs.tag }}
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          file: ./Dockerfile
