@@ -11,7 +11,9 @@ jobs:
          registry: ghcr.io
          username: ${{ github.actor }}
          password: ${{ secrets.GITHUB_TOKEN }}
-     #run: |
-         #echo $CR_PAT | docker login ghcr.io -u reenalmainly --password-stdin
+         run: |
+                 docker build . --tag ghcr.io/reenalmainly/hello-docker-gcr-demo:latest
+                 docker run ghcr.io/reenalmainly/hello-docker-gcr-demo:latest
+                 docker push ghcr.io/reenalmainly/hello-docker-gcr-demo:latest
      #env: 
          #CR_PAT : ${{secrets.CR_PAT}}       
